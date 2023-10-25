@@ -12,10 +12,6 @@ public class ExampleModClient implements ClientModInitializer {
 
 
 	public static boolean shouldBlockBeRendered(BlockState state){
-		if (state.getBlock().getTranslationKey().contains("ore")){
-			System.out.println(state.getBlock().getTranslationKey());
-			return state.getBlock().getTranslationKey().contains("ore");
-		}
-		return false;
+		return state.getBlock().getTranslationKey().contains("ore");
     }
 }
