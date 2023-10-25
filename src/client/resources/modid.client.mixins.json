@@ -1,9 +1,11 @@
 {
 	"required": true,
-	"package": "com.example.mixin.client",
+	"package": "com.lvu.mixin.client",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"ExampleClientMixin"
+		"OreHighlighterMixin",
+		"LightmapTextureManagerMixin",
+		"LuminMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

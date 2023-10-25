@@ -1,4 +1,4 @@
-package com.example;
+package com.lvu;
 
 import net.fabricmc.api.ModInitializer;
 
