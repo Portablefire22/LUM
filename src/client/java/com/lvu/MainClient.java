@@ -1,6 +1,5 @@
 package com.lvu;
 
-import com.lvu.xray.LVUChunkManager;
 import com.lvu.xray.XrayMain;
 import com.lvu.xray.render.BlockHighlightListener;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -13,7 +12,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.command.CommandSource;
@@ -40,14 +38,19 @@ public class MainClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 		// Create directory
 		new File("config/lvu").mkdirs();
-		WorldRenderEvents.END.register(new BlockHighlightListener());
-		//ClientChunkEvents.CHUNK_LOAD.register(new LVUChunkManager());
-		ClientLifecycleEvents.CLIENT_STOPPING.register(new SaveMap());
 		LoadProperties();
 		RegisterCommands();
+		WorldRenderEvents.END.register(new BlockHighlightListener());
+		//ClientChunkEvents.CHUNK_LOAD.register(new LVUChunkManager());
+		//ClientLifecycleEvents.CLIENT_STOPPING.register(SaveMap());
+
 		//ClientChunkEvents.CHUNK_UNLOAD.register(new Unload());
 	}
-
+	//public ClientLifecycleEvents.ClientStopping SaveMap() {
+	//	SaveUtilityProperties();
+	//	XrayMain.SaveProperties();
+	//	return null;
+	//}
 	public static boolean LoadUtilityProperties() {
 		if (!(new File("config/lvu/Utilities.properties").exists())) {
 			try{
@@ -109,6 +112,7 @@ public class MainClient implements ClientModInitializer {
 
 	public void RegisterCommands() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> dispatcher.register(literal("refresh").executes(MainClient::RefreshProperties)));
+		long i = 2048532523523523L;
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> {
 			final LiteralCommandNode<FabricClientCommandSource> removeNode =
 					dispatcher.register(
@@ -134,6 +138,14 @@ public class MainClient implements ClientModInitializer {
 											.then(argument("Utility Name", StringArgumentType.string()).suggests(MOD_OPTIONS)
 													.then(argument("Decision", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
 															.executes(this::UtilityActivation)))));
+			final LiteralCommandNode<FabricClientCommandSource> changeSetting =
+					dispatcher.register(
+							literal("lvu")
+									.then(literal("setting")
+											.then(argument("Utility Name", StringArgumentType.string()).suggests(MOD_OPTIONS)
+													.then(argument("Setting", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
+														.then(argument("Value", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
+																.executes(this::UtilitySetting))))));
 		});
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) ->
 				dispatcher.register(
@@ -141,12 +153,45 @@ public class MainClient implements ClientModInitializer {
 								.then(literal("reset").executes(XrayMain::Reset))));
 	}
 
+
+
 	private int UtilityActivation(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
 		String Utility = getString(context, "Utility Name");
 		boolean Decision = getString(context, "Decision").equals("enable");
 		switch (Utility) {
 			case "xray":
 					UtilityStatus.setProperty(Utility, String.valueOf(Decision));
+				break;
+			default:
+				throw new SimpleCommandExceptionType(Text.translatable("utility.missing")).create();
+		}
+		SaveUtilityProperties();
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private int UtilitySetting(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
+		String Utility = getString(context, "Utility Name");
+		String Setting = getString(context, "Setting");
+		String Value = getString(context, "Value");
+		switch (Utility) {
+			case "xray":
+				switch(Setting){
+					case "legit":
+							if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
+								boolean ValueBool = Value.equals("enable") || Value.equals("true");
+								UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(ValueBool));
+								context.getSource().sendFeedback(Text.of("Legit X-Ray Enabled!"));
+							} else {
+								UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
+								context.getSource().sendFeedback(Text.of("Legit X-Ray Disabled!"));
+							}
+						break;
+					case "range":
+						UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(Value));
+						break;
+					default:
+						throw new SimpleCommandExceptionType(Text.translatable("setting.missing")).create();
+				}
 				break;
 			default:
 				throw new SimpleCommandExceptionType(Text.translatable("utility.missing")).create();

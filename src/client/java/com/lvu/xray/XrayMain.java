@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.text.Text;
 
@@ -20,7 +21,7 @@ import java.util.Properties;
 
 import static com.lvu.Main.LOGGER;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+
 
 public class XrayMain {
     final static Properties XRayBlocks = new Properties();
@@ -100,6 +101,7 @@ public class XrayMain {
     //static Pattern pattern = Pattern.compile("(.*)((?=gold|iron|diamond|copper|coal|redstone|emerald)|(?=_ore|_debris))(.*)");
     //static Matcher matcher = pattern.matcher("");
     public static boolean shouldBlockBeRendered(BlockState state){
+
         String str = state.getBlock().getTranslationKey();
         /*matcher.reset(str);
         if (!BlockMap.containsKey(str)){

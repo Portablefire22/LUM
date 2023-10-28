@@ -6,6 +6,7 @@ import com.lvu.xray.XrayMain;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -14,6 +15,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
@@ -28,6 +30,7 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
     public static Set<ChunkPos> chunks = null;
     private static VertexBuffer vertexBuffer;
 
+    Direction[] Directions = new Direction[]{Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.WEST,Direction.EAST};
     public static int range = 2;
     //Pattern pattern = Pattern.compile("(?<=block.minecraft.)(.*)(?=_ore|_debris|_block)");
     @Override
@@ -45,8 +48,19 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
                         for (int y = -63; y < 255; y++) {
-                            BlockState block = context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z));
+                            BlockPos pos = new BlockPos(x, y, z);
+                            BlockState block = context.world().getChunk(chunkPos.getStartPos()).getBlockState(pos);
                             if (XrayMain.shouldBlockBeRendered(block)) {
+                                if (MainClient.UtilityStatus.get("xray.legit").toString().equals("true")) {
+                                    int blocks = 0;
+                                    if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    else if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    else if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    else if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    else if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    else if (context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("air") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("water") || context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+                                    if (blocks == 0) { continue; }
+                                }
                                 //Chunk chnk = context.world().getChunk(chunkPos.getStartPos());
                                 int offsetX = x + chunkPos.getStartX();
                                 int offsetZ = z + chunkPos.getStartZ();
@@ -62,8 +76,13 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                 }
             }
         }
-        final Vec3d cameraPos = context.camera().getPos();
+        renderBox(BlockCoord, context);
+        lastChunk = new ChunkPos(player.getChunkPos().x, player.getChunkPos().z);
+    }
 
+    private static void renderBox(ArrayList<int[]> BlockCoord, WorldRenderContext context) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        final Vec3d cameraPos = context.camera().getPos();
         if (BlockCoord != null) {
             vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
             if(!BlockCoord.isEmpty()) {
@@ -81,12 +100,7 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                     Matrix4f matrix = context.matrixStack().peek().getPositionMatrix();
                     float size = 1.0f;
                     BlockState block = context.world().getBlockState(new BlockPos(pos[0],pos[1],pos[2]));
-                    //System.out.println(block.getBlock().);
 
-                    /*switch() {
-                        case "block.minecraft.iron_ore" || "block.minecraft.iron_ore":
-                            break;
-                    }*/
                     double DistanceMultiplier = 1 - ((Math.sqrt(Math.pow(pos[0] - player.getPos().x, 2) + Math.pow(pos[1] - player.getPos().y, 2)+ Math.pow(pos[2] - player.getPos().z, 2))))/255;
                     int opacity = 1;
                     int[] Colours = XrayMain.GetblockColour(block);
@@ -157,33 +171,11 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                     tessellator.getBuffer().clear();
                     bufferBuilder.clear();
                     context.matrixStack().pop();
-                        /*WorldRenderer.drawBox(
-                                context.matrixStack(),
-                                //MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers().getBuffer(RenderLayer.getLines()),
-                                /*pos[0],
-                                pos[1],
-                                pos[2],
-                                pos[0] + 1,
-                                pos[1] + 1,
-                                pos[2] + 1,
-                                10,
-                                70,
-                                10,
-                                10 +1,
-                                70+1,
-                                10+1,
-                                (float) 1.0,
-                                (float) 1.0,
-                                (float) 1.0,
-                                1); */
                     RenderSystem.enableDepthTest();
                 }
             }
         }
-        lastChunk = new ChunkPos(player.getChunkPos().x, player.getChunkPos().z);
     }
-
-
 
     private static boolean PlayerMoved() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -199,6 +191,7 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
         ClientPlayerEntity player = client.player;
         //System.out.println(player);
         if (player != null) {
+            range = Integer.parseInt(MainClient.UtilityStatus.get("xray.range").toString());
             int cX = player.getChunkPos().x;
             int cZ = player.getChunkPos().z;
 
