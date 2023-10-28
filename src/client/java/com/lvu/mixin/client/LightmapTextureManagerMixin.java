@@ -1,6 +1,5 @@
 package com.lvu.mixin.client;
 
-import com.lvu.ExampleModClient;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.render.LightmapTextureManager;

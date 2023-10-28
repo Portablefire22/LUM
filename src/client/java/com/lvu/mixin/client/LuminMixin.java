@@ -1,6 +1,5 @@
 package com.lvu.mixin.client;
 
-import com.lvu.ExampleModClient;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import org.spongepowered.asm.mixin.Mixin;

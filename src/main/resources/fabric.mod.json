@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.lvu.ExampleMod"
+			"com.lvu.Main"
 		],
 		"client": [
-			"com.lvu.ExampleModClient"
+			"com.lvu.MainClient"
 		]
 	},
 	"mixins": [
