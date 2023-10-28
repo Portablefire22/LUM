@@ -189,6 +189,16 @@ public class MainClient implements ClientModInitializer {
 					case "range":
 						UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(Value));
 						break;
+					case "pause":
+						if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
+							boolean ValueBool = Value.equals("enable") || Value.equals("true");
+							UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(ValueBool));
+							context.getSource().sendFeedback(Text.of("X-Ray Paused!"));
+						} else {
+							UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
+							context.getSource().sendFeedback(Text.of("X-Ray Unpaused!"));
+						}
+						break;
 					default:
 						throw new SimpleCommandExceptionType(Text.translatable("setting.missing")).create();
 				}

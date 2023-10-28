@@ -168,9 +168,9 @@ public class XrayMain {
         Integer col2 = null;
         Integer col3 = null;
         try {
-            col1 = IntegerArgumentType.getInteger(context, "Colour 1");
-            col2 = IntegerArgumentType.getInteger(context, "Colour 2");
-            col3 = IntegerArgumentType.getInteger(context, "Colour 3");
+            col1 = IntegerArgumentType.getInteger(context, "Red");
+            col2 = IntegerArgumentType.getInteger(context, "Green");
+            col3 = IntegerArgumentType.getInteger(context, "Blue");
         } catch (Exception ignored) {}
         if (arg != null && dec != null) {
             if (!arg.contains("block.")) {
