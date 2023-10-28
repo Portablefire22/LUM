@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.StonecutterBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
@@ -14,10 +13,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.Chunk;
-import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +24,7 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
     public ArrayList<int[]> BlockCoord;
     public static ChunkPos lastChunk;
     private static VertexBuffer vertexBuffer;
+    //Pattern pattern = Pattern.compile("(?<=block.minecraft.)(.*)(?=_ore|_debris|_block)");
     @Override
     public void onEnd(WorldRenderContext context) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -44,7 +41,7 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                         for (int y = -63; y < 255; y++) {
                             BlockState block = context.world().getChunk(chunkPos.getStartPos()).getBlockState(new BlockPos(x, y, z));
                             if (ExampleModClient.shouldBlockBeRendered(block)) {
-                                Chunk chnk = context.world().getChunk(chunkPos.getStartPos());
+                                //Chunk chnk = context.world().getChunk(chunkPos.getStartPos());
                                 int offsetX = x + chunkPos.getStartX();
                                 int offsetZ = z + chunkPos.getStartZ();
                                 //System.out.printf("%s : %d %d %d \n", block.getBlock().getTranslationKey(), offsetX, y, offsetZ);
@@ -58,7 +55,6 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                     }
                 }
             }
-            System.out.printf("Blocks: %d \n", BlockCoord.size());
         }
         final Vec3d cameraPos = context.camera().getPos();
 
@@ -85,64 +81,69 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
                         case "block.minecraft.iron_ore" || "block.minecraft.iron_ore":
                             break;
                     }*/
+                    double DistanceMultiplier = 1 - ((Math.sqrt(Math.pow(pos[0] - player.getPos().x, 2) + Math.pow(pos[1] - player.getPos().y, 2)+ Math.pow(pos[2] - player.getPos().z, 2))))/255;
+                    int opacity = 1;
+                    int[] Colours = ExampleModClient.GetblockColour(block);
+                    int red = (int) ( Colours[0] * DistanceMultiplier);
+                    int green = (int) ( Colours[1] * DistanceMultiplier);
+                    int blue = (int) ( Colours[2] * DistanceMultiplier);
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
-
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
                     // BOTTOM
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(red, green, blue, opacity).next();
 
                     // Edge 1
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
                     // Edge 2
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1], pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0] + size, pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
                     // Edge 3
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2] + size).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2] + size).color(red, green, blue, opacity).next();
 
                     // Edge 4
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1], pos[2]).color(red, green, blue, opacity).next();
 
-                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(255, 255, 255, 255).next();
+                    bufferBuilder.vertex(matrix, pos[0], pos[1] + size, pos[2]).color(red, green, blue, opacity).next();
 
 
                     tessellator.draw();
@@ -174,6 +175,8 @@ public class BlockHighlightListener  implements WorldRenderEvents.End {
         }
         lastChunk = new ChunkPos(player.getChunkPos().x, player.getChunkPos().z);
     }
+
+
 
     private static boolean PlayerMoved() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
