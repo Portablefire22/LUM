@@ -127,9 +127,9 @@ public class MainClient implements ClientModInitializer {
 								.then(literal("block")
 										.then(argument("Decision", StringArgumentType.string()).suggests(XRAY_OPTIONS)
 												.then(argument("Block Name", StringArgumentType.string())
-														.then(argument("Colour 1", IntegerArgumentType.integer())
-																.then(argument("Colour 2", IntegerArgumentType.integer())
-																		.then(argument("Colour 3", IntegerArgumentType.integer())
+														.then(argument("Red", IntegerArgumentType.integer())
+																.then(argument("Green", IntegerArgumentType.integer())
+																		.then(argument("Blue", IntegerArgumentType.integer())
 														.executes(XrayMain::Whitelist))))))));
 			final LiteralCommandNode<FabricClientCommandSource> toggleMod =
 					dispatcher.register(
