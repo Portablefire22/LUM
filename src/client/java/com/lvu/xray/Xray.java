@@ -7,7 +7,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.text.Text;
 
@@ -23,7 +22,7 @@ import static com.lvu.Main.LOGGER;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 
 
-public class XrayMain {
+public class Xray {
     final static Properties XRayBlocks = new Properties();
     static Map<String, int[]> BlockMap = new HashMap<>();
 
@@ -98,23 +97,12 @@ public class XrayMain {
         return true;
     }
 
-    //static Pattern pattern = Pattern.compile("(.*)((?=gold|iron|diamond|copper|coal|redstone|emerald)|(?=_ore|_debris))(.*)");
-    //static Matcher matcher = pattern.matcher("");
     public static boolean shouldBlockBeRendered(BlockState state){
-
         String str = state.getBlock().getTranslationKey();
-        /*matcher.reset(str);
-        if (!BlockMap.containsKey(str)){
-            //System.out.println(str);
-            if (matcher.matches()){
-                BlockMap.put(str, new int[]{0,0,0});
-                return true;
-            }
-        }*/
         return BlockMap.containsKey(str);
 }
 
-    public static int[] GetblockColour(BlockState block) {
+    public static int[] GetBlockColour(BlockState block) {
         String str = block.getBlock().getTranslationKey();
         int[] col = BlockMap.get(str);
         int red;
@@ -129,18 +117,16 @@ public class XrayMain {
             green = 0;
             blue = 255;
         }
-
         return new int[]{red, green, blue};
     }
 
     public static int WhitelistRemove(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String arg = getString(context, "Block Name");
-        String formatted = null;
+        String formatted;
         if(arg != null) {
             if (!arg.contains("block.") & !arg.equals("all")) {
                 arg = "block.minecraft." + arg;
             }
-            //LOGGER.info(arg + " == " + "all" + " | " + String.valueOf(!arg.trim().equals("all")));
             if (!arg.trim().equals("all")) {
                 if (BlockMap.containsKey(arg)) {
                     BlockMap.remove(arg);
@@ -158,7 +144,6 @@ public class XrayMain {
         } else {
             throw new SimpleCommandExceptionType(Text.translatable("arguments.missing")).create();
         }
-
     }
 
     public static int Whitelist(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
@@ -190,7 +175,7 @@ public class XrayMain {
                     }
                     break;
                 default:
-                    formatted = "Command could not determine the decision!";
+                    formatted = "Command could not determine the decision: " + dec +"!";
             }
             SaveBlockMap();
             if(LoadProperties()) {

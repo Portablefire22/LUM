@@ -1,20 +1,17 @@
 package com.lvu;
 
-import com.lvu.xray.XrayMain;
-import com.lvu.xray.render.BlockHighlightListener;
+import com.lvu.xray.Xray;
+import com.lvu.xray.render.Render;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
 import static com.lvu.Main.LOGGER;
@@ -40,24 +37,15 @@ public class MainClient implements ClientModInitializer {
 		new File("config/lvu").mkdirs();
 		LoadProperties();
 		RegisterCommands();
-		WorldRenderEvents.END.register(new BlockHighlightListener());
-		//ClientChunkEvents.CHUNK_LOAD.register(new LVUChunkManager());
-		//ClientLifecycleEvents.CLIENT_STOPPING.register(SaveMap());
-
-		//ClientChunkEvents.CHUNK_UNLOAD.register(new Unload());
+		WorldRenderEvents.END.register(new Render());
 	}
-	//public ClientLifecycleEvents.ClientStopping SaveMap() {
-	//	SaveUtilityProperties();
-	//	XrayMain.SaveProperties();
-	//	return null;
-	//}
 	public static boolean LoadUtilityProperties() {
 		if (!(new File("config/lvu/Utilities.properties").exists())) {
 			try{
 				LOGGER.info("[LVU] No 'Utilities.properties' found, using default settings!");
 				UtilityStatus.load(MainClient.class.getResourceAsStream("/DefaultUtilities.properties"));
 				LOGGER.info("[LVU] Saving default settings to config.");
-				SaveUtilityProperties();
+				SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
 				LOGGER.info("[LVU] Saved default settings.");
 			} catch (Exception e) {
 				LOGGER.error("[LVU] Error loading properties & saving to file!");
@@ -67,14 +55,14 @@ public class MainClient implements ClientModInitializer {
 			try {
 				UtilityStatus.load(new FileInputStream("config/lvu/Utilities.properties"));
 			}catch(IOException ignored) {return false;}}
-		LOGGER.info("Properties Loaded!");
+		LOGGER.info("Utility Properties Loaded!");
 		return true;
 	}
 
-	public static boolean SaveUtilityProperties() {
+	public static boolean SaveProperties(Properties Prop, String Path) {
 		try {
-			UtilityStatus.store(new FileOutputStream("config/lvu/Utilities.properties"), null);
-			LOGGER.info("[LVU] " + "Successfully saved to Utilities.properties!");
+			Prop.store(new FileOutputStream(Path), null);
+			LOGGER.info("[LVU] " + "Successfully saved to " + Path + "!");
 			return true;
 		} catch (IOException ignored) { return false;}
 	}
@@ -82,13 +70,38 @@ public class MainClient implements ClientModInitializer {
 	// Load all property files when client is initialised
 	public static boolean LoadProperties() {
 		try{
-			XrayMain.LoadProperties();
+			Xray.LoadProperties();
 			LoadUtilityProperties();
+			// Currently only the main settings require this.
+			LoadDefaults("/DefaultUtilities.properties", UtilityStatus);
 			return true;
 		} catch(Exception e) {
 			return false;
 		}
 	}
+
+	// Iterate through settings and add missing settings, allows for old configs to be used after updates.
+	public static boolean LoadDefaults(String DefaultPath, Properties User) {
+		Properties Default  = new Properties();
+		boolean Added = false;
+		try {
+			Default.load(MainClient.class.getResourceAsStream(DefaultPath));
+		}catch(IOException ignored) {return false;}
+		LOGGER.info("Default File Successfully Loaded.");
+		for (String key : Default.stringPropertyNames()) {
+			if (!User.containsKey(key.toString())) {
+				User.put(key, Default.get(key));
+				Added = !Added;
+			}
+		}
+		SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
+		if (Added) {
+			LOGGER.info("Missing settings were added from: " + DefaultPath + "!");
+			return true;
+		}
+		return false;
+	}
+
 
 	public static int RefreshProperties(CommandContext<FabricClientCommandSource> context) {
 		context.getSource().sendFeedback(Text.literal("Refreshing Properties."));
@@ -100,16 +113,6 @@ public class MainClient implements ClientModInitializer {
 		return 1;
 	}
 
-	private static SuggestionProvider<FabricClientCommandSource> XRAY_OPTIONS =
-		(ctx, builder) -> CommandSource.suggestMatching("add\nmodify".lines(), builder);
-
-	private static SuggestionProvider<FabricClientCommandSource> MOD_OPTIONS =
-			(ctx, builder) -> CommandSource.suggestMatching("xray".lines(), builder);
-
-	private static SuggestionProvider<FabricClientCommandSource> ENABLE_OR_DISABLE =
-			(ctx, builder) -> CommandSource.suggestMatching("enable\ndisable".lines(), builder);
-
-
 	public void RegisterCommands() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> dispatcher.register(literal("refresh").executes(MainClient::RefreshProperties)));
 		long i = 2048532523523523L;
@@ -119,38 +122,38 @@ public class MainClient implements ClientModInitializer {
 							literal("xray")
 									.then(literal("remove")
 											.then(argument("Block Name", StringArgumentType.string())
-													.executes(XrayMain::WhitelistRemove))));
+													.executes(Xray::WhitelistRemove))));
 
 			final LiteralCommandNode<FabricClientCommandSource> blockNode =
 				dispatcher.register(
 						literal("xray")
 								.then(literal("block")
-										.then(argument("Decision", StringArgumentType.string()).suggests(XRAY_OPTIONS)
+										.then(argument("Decision", StringArgumentType.string()).suggests(CustomSuggestionProviders.XRAY_OPTIONS)
 												.then(argument("Block Name", StringArgumentType.string())
 														.then(argument("Red", IntegerArgumentType.integer())
 																.then(argument("Green", IntegerArgumentType.integer())
 																		.then(argument("Blue", IntegerArgumentType.integer())
-														.executes(XrayMain::Whitelist))))))));
+														.executes(Xray::Whitelist))))))));
 			final LiteralCommandNode<FabricClientCommandSource> toggleMod =
 					dispatcher.register(
 							literal("lvu")
 									.then(literal("utility")
-											.then(argument("Utility Name", StringArgumentType.string()).suggests(MOD_OPTIONS)
-													.then(argument("Decision", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
+											.then(argument("Utility Name", StringArgumentType.string()).suggests(CustomSuggestionProviders.MOD_OPTIONS)
+													.then(argument("Decision", StringArgumentType.string()).suggests(CustomSuggestionProviders.ENABLE_OR_DISABLE)
 															.executes(this::UtilityActivation)))));
 			final LiteralCommandNode<FabricClientCommandSource> changeSetting =
 					dispatcher.register(
 							literal("lvu")
 									.then(literal("setting")
-											.then(argument("Utility Name", StringArgumentType.string()).suggests(MOD_OPTIONS)
-													.then(argument("Setting", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
-														.then(argument("Value", StringArgumentType.string()).suggests(ENABLE_OR_DISABLE)
+											.then(argument("Utility Name", StringArgumentType.string()).suggests(CustomSuggestionProviders.MOD_OPTIONS)
+													.then(argument("Setting", StringArgumentType.string()).suggests(CustomSuggestionProviders.ENABLE_OR_DISABLE)
+														.then(argument("Value", StringArgumentType.string()).suggests(CustomSuggestionProviders.ENABLE_OR_DISABLE)
 																.executes(this::UtilitySetting))))));
 		});
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) ->
 				dispatcher.register(
 						literal("xray")
-								.then(literal("reset").executes(XrayMain::Reset))));
+								.then(literal("reset").executes(Xray::Reset))));
 	}
 
 
@@ -165,7 +168,7 @@ public class MainClient implements ClientModInitializer {
 			default:
 				throw new SimpleCommandExceptionType(Text.translatable("utility.missing")).create();
 		}
-		SaveUtilityProperties();
+		SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -206,7 +209,7 @@ public class MainClient implements ClientModInitializer {
 			default:
 				throw new SimpleCommandExceptionType(Text.translatable("utility.missing")).create();
 		}
-		SaveUtilityProperties();
+		SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
 		return Command.SINGLE_SUCCESS;
 	}
 }
