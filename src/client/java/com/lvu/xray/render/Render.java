@@ -3,6 +3,7 @@ package com.lvu.xray.render;
 import com.lvu.MainClient;
 import com.lvu.xray.BlockManager;
 import com.lvu.xray.Xray;
+import com.lvu.xray.chunk.XrayChunkManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -18,20 +19,26 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Render implements WorldRenderEvents.End {
     public static ChunkPos lastChunk;
 
     Direction[] Directions = new Direction[]{Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.WEST,Direction.EAST};
     public static int range = 2;
+    ArrayList<int[]> BlockCoord = null;
     //Pattern pattern = Pattern.compile("(?<=block.minecraft.)(.*)(?=_ore|_debris|_block)");
     @Override
     public void onEnd(WorldRenderContext context) {
         if(MainClient.UtilityStatus.get("xray").equals("false")) { return; }
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        ArrayList<int[]> BlockCoord = null;
         if (PlayerMoved() && MainClient.UtilityStatus.get("xray.pause").equals("false")) {
-            BlockCoord = BlockManager.GetBlocks(context);
+            Set<ChunkPos> chunks = XrayChunkManager.getchunks(context);
+            if (MainClient.UtilityStatus.get("xray.experimentalsearch").equals("false")){
+                BlockCoord = BlockManager.GetBlocks(context, chunks);
+            } else {
+                BlockCoord = BlockManager.GetBlocksHashSearch(context, chunks);
+            }
         }
         renderBox(BlockCoord, context);
         lastChunk = new ChunkPos(player.getChunkPos().x, player.getChunkPos().z);

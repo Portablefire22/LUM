@@ -1,17 +1,18 @@
 # LVU
 *No clue what the name means, but the U is for 'Utility'.*
-## Current Features
 
- - Permanent X-Ray outlines around ores
+Compatible with [Sodium](https://github.com/CaffeineMC/sodium-fabric) & [Iris Shaders](https://github.com/IrisShaders/Iris)!
+## Current Features
+### General
+- Toggle active 'utility'
+### X-ray
+- Add/Remove blocks to the block x-ray
+- Edit colours of the x-ray outlines
+- Legit Mode (Only show ores that have a visible side, doesn't conflict with anti-cheat)
 
 ## Planned Features 
 ### General
- - Toggle active 'utility'
  - GUI for config & selecting active features
-### X-ray
- - Add/Remove blocks to the block x-ray
- - Edit colours of the x-ray outlines
- - Legit Mode (Only show ores that have a visible side, doesn't conflict with anti-cheat)
 ### Other Features
  - Auto-Fish
  - Auto-Mobfarm

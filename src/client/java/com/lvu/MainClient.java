@@ -1,6 +1,7 @@
 package com.lvu;
 
 import com.lvu.xray.Xray;
+import com.lvu.xray.chunk.OnChunkLoad;
 import com.lvu.xray.render.Render;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -11,6 +12,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.text.Text;
 
@@ -38,6 +41,8 @@ public class MainClient implements ClientModInitializer {
 		LoadProperties();
 		RegisterCommands();
 		WorldRenderEvents.END.register(new Render());
+		ClientChunkEvents.CHUNK_LOAD.register(new OnChunkLoad());
+		ClientLifecycleEvents.CLIENT_STOPPING.register(new OnClientStop());
 	}
 	public static boolean LoadUtilityProperties() {
 		if (!(new File("config/lvu/Utilities.properties").exists())) {
@@ -154,6 +159,10 @@ public class MainClient implements ClientModInitializer {
 				dispatcher.register(
 						literal("xray")
 								.then(literal("reset").executes(Xray::Reset))));
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) ->
+				dispatcher.register(
+						literal("xray")
+								.then(literal("resetworld").executes(Xray::WorldReset))));
 	}
 
 
@@ -180,26 +189,27 @@ public class MainClient implements ClientModInitializer {
 			case "xray":
 				switch(Setting){
 					case "legit":
-							if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
-								boolean ValueBool = Value.equals("enable") || Value.equals("true");
-								UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(ValueBool));
-								context.getSource().sendFeedback(Text.of("Legit X-Ray Enabled!"));
-							} else {
-								UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
-								context.getSource().sendFeedback(Text.of("Legit X-Ray Disabled!"));
-							}
+						if (SimpleEnableCheck(Utility, Setting, Value)) {
+							context.getSource().sendFeedback(Text.of("Legit Mode Enabled!"));
+						} else {
+							context.getSource().sendFeedback(Text.of("Legit Mode Disabled!"));
+						}
 						break;
 					case "range":
 						UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(Value));
 						break;
 					case "pause":
-						if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
-							boolean ValueBool = Value.equals("enable") || Value.equals("true");
-							UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(ValueBool));
+						if (SimpleEnableCheck(Utility, Setting, Value)) {
 							context.getSource().sendFeedback(Text.of("X-Ray Paused!"));
 						} else {
-							UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
 							context.getSource().sendFeedback(Text.of("X-Ray Unpaused!"));
+						}
+						break;
+					case "experimentalsearch":
+						if (SimpleEnableCheck(Utility, Setting, Value)) {
+							context.getSource().sendFeedback(Text.of("Experimental Search Enabled!"));
+						} else {
+							context.getSource().sendFeedback(Text.of("Experimental Search Disabled!"));
 						}
 						break;
 					default:
@@ -211,5 +221,15 @@ public class MainClient implements ClientModInitializer {
 		}
 		SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
 		return Command.SINGLE_SUCCESS;
+	}
+
+	private boolean SimpleEnableCheck(String Utility, String Setting, String Value) {
+		if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
+			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(true));
+			return true;
+		} else {
+			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
+			return false;
+		}
 	}
 }

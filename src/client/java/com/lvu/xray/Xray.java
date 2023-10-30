@@ -1,6 +1,7 @@
 package com.lvu.xray;
 
 import com.lvu.MainClient;
+import com.lvu.xray.chunk.XrayChunkManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,7 +9,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.text.Text;
+import net.minecraft.world.chunk.ChunkManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -191,6 +195,13 @@ public class Xray {
     public static int Reset(CommandContext<FabricClientCommandSource> context) {
         context.getSource().sendFeedback(Text.literal("Resetting X-Ray config to default settings!"));
         ResetBlockMap(context);
+
+        return 1;
+    }
+    public static int WorldReset(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Text.literal("Resetting X-Ray World!"));
+        XrayChunkManager.ChunkMap.clear();
+        //MinecraftClient.getInstance().player.getServer().getWorld().getChunkManager().threadedAnvilChunkStorage
         return 1;
     }
 }
