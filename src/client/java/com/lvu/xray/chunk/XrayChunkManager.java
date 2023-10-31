@@ -9,6 +9,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,21 +30,34 @@ public class XrayChunkManager {
         if (player != null) {
             range = Integer.parseInt(MainClient.UtilityStatus.get("xray.range").toString());
             int cX = player.getChunkPos().x;
-            int cZ = player.getChunkPos().z;
-            //    int skippedChunks = 0;
-            //System.out.printf("cX: &d | cZ: &d%n", cX, cZ);
-            Set<ChunkPos> chunks = new HashSet<>();
-            for (int i = cX - range; i <= cX + range; i++) {
-                //System.out.println(String.format("i: &d", i));
-                for (int j = cZ - range; j <= cZ + range; j++) {
-                    //System.out.println(String.format("j: &d", j));
-                    ChunkPos chunk = new ChunkPos(i, j);
-                    chunks.add(chunk);
-                }
-            }
+            Set<ChunkPos> chunks = getChunkPosSet(player, cX);
             return chunks;
         }
         return new HashSet<>();
+    }
+
+    @NotNull
+    private static Set<ChunkPos> getChunkPosSet(ClientPlayerEntity player, int cX) {
+        int cZ = player.getChunkPos().z;
+        //    int skippedChunks = 0;
+        //System.out.printf("cX: &d | cZ: &d%n", cX, cZ);
+        Set<ChunkPos> chunks = new HashSet<>();
+        for (int i = cX - range; i <= cX + range; i++) {
+            //System.out.println(String.format("i: &d", i));
+            for (int j = cZ - range; j <= cZ + range; j++) {
+                //System.out.println(String.format("j: &d", j));
+                //Main.LOGGER.info("[" + i + "," + j + "]");
+                ChunkPos chunk = new ChunkPos(i, j);
+                HashMap<String, ArrayList<int[]>> chunkResult = ChunkMap.get(chunk);
+                if  (chunkResult == null) {
+                    ChunkToHash(player.clientWorld, (WorldChunk) player.clientWorld.getChunk(chunk.getStartPos()));
+                } /*else {
+                    Main.LOGGER.info("Chunk Result: "  + String.valueOf(chunkResult));
+                }*/
+                chunks.add(chunk);
+            }
+        }
+        return chunks;
     }
 
     /*
@@ -63,8 +77,13 @@ public class XrayChunkManager {
 
     public static void ChunkToHash(ClientWorld world, WorldChunk chunk) {
         if (!ChunkMap.containsKey(chunk.getPos())) {
-            Main.LOGGER.info("Converting : " + chunk.getPos());
-            ChunkMap.put(chunk.getPos(), BlockManager.BlocksToHash(world, chunk));
+            //Main.LOGGER.info("Converting : " + chunk.getPos());
+            if (ChunkMap.get(chunk.getPos()) != null) {
+                HashMap<String, ArrayList<int[]>> blocks = BlockManager.BlocksToHash(world, chunk);
+                if (!blocks.containsKey("VOID")){
+                    ChunkMap.put(chunk.getPos(), blocks);
+                }
+            }
             try {
                 //SaveChunksToFile();
             } catch (Exception e) { e.printStackTrace(); }

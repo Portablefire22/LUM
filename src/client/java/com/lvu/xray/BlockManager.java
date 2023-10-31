@@ -11,6 +11,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -52,7 +53,7 @@ public class BlockManager {
                 boolean i = true;
                 int loop = 0;
                 while (i) {
-                    if (XrayChunkManager.ChunkMap.get(chunkPos) != null && !XrayChunkManager.ChunkMap.get(chunkPos).isEmpty()) {
+                    if (XrayChunkManager.ChunkMap.get(chunkPos) != null) {
                         loop = 0;
                         Blocks = XrayChunkManager.ChunkMap.get(chunkPos).get(BlockName);
                         i = false;
@@ -70,10 +71,12 @@ public class BlockManager {
                             i = false;
                             continue;
                         } else {
-                            XrayChunkManager.ChunkMap.put(chunkPos, BlocksToHash(context.world(), context.world().getChunk(chunkPos.getRegionRelativeX(), chunkPos.getRegionRelativeZ())));
-                            Main.LOGGER.info("Relative: " + chunkPos.getRegionRelativeX() + " " + chunkPos.getRegionRelativeZ());
-                            Main.LOGGER.info("Region: " + chunkPos.getRegionX() + " " + chunkPos.getRegionZ());
-                            Main.LOGGER.info(String.valueOf(context.world().isChunkLoaded(chunkPos.getRegionRelativeX(), chunkPos.getRegionRelativeZ())));
+                            HashMap<String, ArrayList<int[]>> blocks = BlocksToHash(context.world(),context.world().getChunk(chunkPos.getRegionRelativeX(), chunkPos.getRegionRelativeZ()));
+                            if (!blocks.containsKey("VOID")) {
+                                XrayChunkManager.ChunkMap.put(chunkPos, blocks);
+                            }
+                            //Main.LOGGER.info("Relative: " + chunkPos.getRegionRelativeX() + " " + chunkPos.getRegionRelativeZ());
+                            //Main.LOGGER.info(String.valueOf(context.world().isChunkLoaded(chunkPos.getRegionRelativeX(), chunkPos.getRegionRelativeZ())));
                         }
                     }
                     if (Blocks != null) {
@@ -121,7 +124,8 @@ public class BlockManager {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState block = chunk.getBlockState(pos);
                     String blockName = block.getBlock().getTranslationKey();
-                    if (blockName.contains("air")) { continue; }
+                    if(blockName.contains("void")) { ChunkMap.put("VOID", new ArrayList<>()); continue;}
+                    if (blockName.contains("air") || !world.getWorldBorder().contains(pos)) { continue; }
                     // Working with relative coords, so we need to turn this into a world coordinate from the chunk
                     int offsetX = x + chunkPos.getStartX();
                     int offsetZ = z + chunkPos.getStartZ();
@@ -133,7 +137,7 @@ public class BlockManager {
                     if (MainClient.UtilityStatus.get("xray.legit").toString().equals("true")) {
                         if (isVisible(world, offsetX, y, offsetZ)) { i = 1;; }
                     }
-
+                    //Main.LOGGER.info(blockName);
                     ArrayList<int[]> blocks = new ArrayList<>();
                     if (ChunkMap.containsKey(blockName)) {
                         blocks = ChunkMap.get(blockName);

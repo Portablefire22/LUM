@@ -224,12 +224,12 @@ public class MainClient implements ClientModInitializer {
 	}
 
 	private boolean SimpleEnableCheck(String Utility, String Setting, String Value) {
-		if (Value.equals("enable") || Value.equals("disable") || Value.equals("true") || Value.equals("false")) {
+		if (Value.equals("enable") || Value.equals("true") ) {
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(true));
 			return true;
-		} else {
+		} else if (Value.equals("disable") || Value.equals("false")){
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
-			return false;
 		}
+		return false;
 	}
 }
