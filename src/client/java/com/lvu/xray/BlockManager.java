@@ -103,11 +103,11 @@ public class BlockManager {
         */
         int blocks = 0;
         String b0 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
-        String b1 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
-        String b2 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
-        String b3 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
-        String b4 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
-        String b5 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b1 = world.getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey();
+        String b2 = world.getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey();
+        String b3 = world.getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey();
+        String b4 = world.getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey();
+        String b5 = world.getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey();
         if (b0.contains("air") || b0.contains("water") || b0.contains("lava")) {blocks++;}
         else if (b1.contains("air") || b1.contains("water") || b1.contains("lava")) {blocks++;}
         else if (b2.contains("air") || b2.contains("water") || b2.contains("lava")) {blocks++;}
