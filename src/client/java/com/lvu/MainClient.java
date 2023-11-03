@@ -80,7 +80,6 @@ public class MainClient implements ClientModInitializer {
 			LoadUtilityProperties();
 			// Currently only the main settings require this.
 			LoadDefaults("/DefaultUtilities.properties", UtilityStatus);
-			//XrayChunkManager.LoadChunksFromFile();
 			return true;
 		} catch(Exception e) {
 			return false;
@@ -226,7 +225,7 @@ public class MainClient implements ClientModInitializer {
 	}
 
 	private boolean SimpleEnableCheck(String Utility, String Setting, String Value) {
-		if (Value.equals("enable") || Value.equals("true") ) {
+		if (Value.equals("enable") || Value.equals("true")) {
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(true));
 			return true;
 		} else if (Value.equals("disable") || Value.equals("false")){

@@ -105,12 +105,18 @@ public class BlockManager {
             Find a better solution to detecting if the block should be visible.
         */
         int blocks = 0;
-        if (world.getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x + 1, y, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
-        else if (world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
-        else if (world.getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x, y + 1, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
-        else if (world.getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x, y - 1, z)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
-        else if (world.getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x, y, z + 1)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
-        else if (world.getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("air") || world.getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("water") || world.getBlockState(new BlockPos(x, y, z - 1)).getBlock().getTranslationKey().contains("lava")) {blocks++;}
+        String b0 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b1 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b2 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b3 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b4 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        String b5 = world.getBlockState(new BlockPos(x - 1, y, z)).getBlock().getTranslationKey();
+        if (b0.contains("air") || b0.contains("water") || b0.contains("lava")) {blocks++;}
+        else if (b1.contains("air") || b1.contains("water") || b1.contains("lava")) {blocks++;}
+        else if (b2.contains("air") || b2.contains("water") || b2.contains("lava")) {blocks++;}
+        else if (b3.contains("air") || b3.contains("water") || b3.contains("lava")) {blocks++;}
+        else if (b4.contains("air") || b4.contains("water") || b4.contains("lava")) {blocks++;}
+        else if (b5.contains("air") || b5.contains("water") || b5.contains("lava")) {blocks++;}
         return blocks > 0;
     }
 
