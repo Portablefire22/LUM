@@ -2,6 +2,7 @@ package com.lvu;
 
 import com.lvu.xray.Xray;
 import com.lvu.xray.chunk.OnChunkLoad;
+import com.lvu.xray.chunk.XrayChunkManager;
 import com.lvu.xray.render.Render;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -227,9 +228,9 @@ public class MainClient implements ClientModInitializer {
 		if (Value.equals("enable") || Value.equals("true")) {
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(true));
 			return true;
-		} else {
+		} else if (Value.equals("disable") || Value.equals("false")){
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
-			return false;
 		}
+		return false;
 	}
 }

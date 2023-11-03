@@ -28,12 +28,14 @@ public class Render implements WorldRenderEvents.End {
     public static int range = 2;
     ArrayList<int[]> BlockCoord = null;
     //Pattern pattern = Pattern.compile("(?<=block.minecraft.)(.*)(?=_ore|_debris|_block)");
+
+
     @Override
     public void onEnd(WorldRenderContext context) {
         if(MainClient.UtilityStatus.get("xray").equals("false")) { return; }
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (PlayerMoved() && MainClient.UtilityStatus.get("xray.pause").equals("false")) {
-            Set<ChunkPos> chunks = XrayChunkManager.getchunks(context);
+            Set<ChunkPos> chunks = XrayChunkManager.getchunks();
             if (MainClient.UtilityStatus.get("xray.experimentalsearch").equals("false")){
                 BlockCoord = BlockManager.GetBlocks(context, chunks);
             } else {

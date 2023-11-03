@@ -3,16 +3,15 @@ package com.lvu.xray.chunk;
 import com.lvu.Main;
 import com.lvu.MainClient;
 import com.lvu.xray.BlockManager;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,28 +21,43 @@ import static com.lvu.xray.render.Render.range;
 
 public class XrayChunkManager {
     public static HashMap<ChunkPos, HashMap<String, ArrayList<int[]>>> ChunkMap = new HashMap<>();
-    public static Set<ChunkPos> getchunks(WorldRenderContext context) {
+    public static Set<ChunkPos> getchunks() {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
         //System.out.println(player);
         if (player != null) {
             range = Integer.parseInt(MainClient.UtilityStatus.get("xray.range").toString());
-            int cX = player.getChunkPos().x;
-            int cZ = player.getChunkPos().z;
-            //    int skippedChunks = 0;
-            //System.out.printf("cX: &d | cZ: &d%n", cX, cZ);
-            Set<ChunkPos> chunks = new HashSet<>();
-            for (int i = cX - range; i <= cX + range; i++) {
-                //System.out.println(String.format("i: &d", i));
-                for (int j = cZ - range; j <= cZ + range; j++) {
-                    //System.out.println(String.format("j: &d", j));
-                    ChunkPos chunk = new ChunkPos(i, j);
-                    chunks.add(chunk);
-                }
-            }
+            Set<ChunkPos> chunks = getChunkPosSet(player);
             return chunks;
         }
         return new HashSet<>();
+    }
+
+    @NotNull
+    private static Set<ChunkPos> getChunkPosSet(ClientPlayerEntity player) {
+        int cZ = player.getChunkPos().z;
+        int cX = player.getChunkPos().x;
+        Main.LOGGER.info("cX: {} | cZ: {}", cX, cZ);
+        //    int skippedChunks = 0;
+        //System.out.printf("cX: &d | cZ: &d%n", cX, cZ);
+        Set<ChunkPos> chunks = new HashSet<>();
+        for (int i = cX - range; i <= cX + range; i++) {
+            //System.out.println(String.format("i: &d", i));
+            for (int j = cZ - range; j <= cZ + range; j++) {
+                //System.out.println(String.format("j: &d", j));
+
+                ChunkPos chunk = new ChunkPos(i, j);
+                HashMap<String, ArrayList<int[]>> chunkResult = ChunkMap.get(chunk);
+                //Main.LOGGER.info("[" + i + "," + j + "] = " + chunkResult);
+                if  (chunkResult == null) {
+                    ChunkToHash(player.getWorld(), player.getWorld().getChunk(chunk.x, chunk.z));
+                } /*else {
+                    Main.LOGGER.info("Chunk Result: "  + String.valueOf(chunkResult));
+                }*/
+                chunks.add(chunk);
+            }
+        }
+        return chunks;
     }
 
     /*
@@ -61,10 +75,15 @@ public class XrayChunkManager {
     Currently the initial range does not ever get loaded. fix this.
      */
 
-    public static void ChunkToHash(ClientWorld world, WorldChunk chunk) {
+    public static void ChunkToHash(World world, WorldChunk chunk) {
         if (!ChunkMap.containsKey(chunk.getPos())) {
-            Main.LOGGER.info("Converting : " + chunk.getPos());
-            ChunkMap.put(chunk.getPos(), BlockManager.BlocksToHash(world, chunk));
+            //Main.LOGGER.info("Converting : " + chunk.getPos());
+            if (ChunkMap.get(chunk.getPos()) == null) {
+                HashMap<String, ArrayList<int[]>> blocks = BlockManager.BlocksToHash((ClientWorld) world, chunk);
+                if (!blocks.containsKey("VOID")){
+                    ChunkMap.put(chunk.getPos(), blocks);
+                }
+            }
             try {
                 //SaveChunksToFile();
             } catch (Exception e) { e.printStackTrace(); }
@@ -74,8 +93,25 @@ public class XrayChunkManager {
     public static void SaveChunksToFile() throws IOException {
         FileOutputStream fileOut = new FileOutputStream("config/lvu/Chunks.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(ChunkMap);
+        HashMap<int[], HashMap<String, ArrayList<int[]>>> SaveMap = new HashMap<>();
+        for(ChunkPos chunkpos: ChunkMap.keySet() ) {
+            SaveMap.put(new int[]{chunkpos.x,chunkpos.z}, ChunkMap.get(chunkpos));
+        }
+        out.writeObject(SaveMap);
+        out.reset();
         out.close();
         fileOut.close();
+    }
+
+    public static void LoadChunksFromFile() throws IOException, ClassNotFoundException {
+        FileInputStream fileIn = new FileInputStream("config/lvu/Chunks.ser");
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        HashMap<int[], HashMap<String, ArrayList<int[]>>> SaveMap = (HashMap<int[], HashMap<String, ArrayList<int[]>>>) in.readObject();
+        for(int[] intArr: SaveMap.keySet() ) {
+            ChunkMap.put(new ChunkPos(intArr[0], intArr[1]), SaveMap.get(intArr));
+        }
+        in.reset();
+        in.close();
+        fileIn.close();
     }
 }

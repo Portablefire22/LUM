@@ -14,7 +14,7 @@ public class OnChunkLoad implements  ClientChunkEvents.Load{
     public void onChunkLoad(ClientWorld world, WorldChunk chunk) {
         ClientPlayerEntity player = client.player;
         if(player != null) {
-            XrayChunkManager.ChunkToHash(world, chunk);
+            //XrayChunkManager.ChunkToHash(world, chunk);
         }
     }
 }
