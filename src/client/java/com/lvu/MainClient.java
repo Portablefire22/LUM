@@ -1,5 +1,7 @@
 package com.lvu;
 
+import com.lvu.waypoint.Waypoint;
+import com.lvu.waypoint.WaypointManager;
 import com.lvu.xray.Xray;
 import com.lvu.xray.chunk.OnChunkLoad;
 import com.lvu.xray.chunk.XrayChunkManager;
@@ -164,6 +166,22 @@ public class MainClient implements ClientModInitializer {
 				dispatcher.register(
 						literal("xray")
 								.then(literal("resetworld").executes(Xray::WorldReset))));
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> {
+			final LiteralCommandNode<FabricClientCommandSource> NoPlayerOrPos =
+					dispatcher.register(
+							literal("waypoint")
+									.then(literal("add")
+											.then(argument("Waypoint Name", StringArgumentType.string())
+													.executes(WaypointManager::CreateWaypoint))));
+
+			final LiteralCommandNode<FabricClientCommandSource> changeSetting =
+					dispatcher.register(
+							literal("waypoint")
+									.then(literal("add")
+											.then(argument("Waypoint Name", StringArgumentType.string())).redirect(NoPlayerOrPos))
+				);
+
+		});
 	}
 
 
