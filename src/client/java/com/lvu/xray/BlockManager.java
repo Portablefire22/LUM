@@ -124,7 +124,7 @@ public class BlockManager {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState block = chunk.getBlockState(pos);
                     String blockName = block.getBlock().getTranslationKey();
-                    if(blockName.contains("void")) { ChunkMap.put("VOID", new ArrayList<>()); continue;}
+                    if(blockName.contains("void")) { ChunkMap.put("VOID", new ArrayList<>()); break;}
                     if (blockName.contains("air") || !world.getWorldBorder().contains(pos)) { continue; }
                     // Working with relative coords, so we need to turn this into a world coordinate from the chunk
                     int offsetX = x + chunkPos.getStartX();
@@ -134,6 +134,9 @@ public class BlockManager {
                     // This ensures the block is visible before rendering it to avoid the anti-cheat.
                     // This displays fewer ores but negates the anti-cheat.
                     int i = 0;
+
+
+
                     if (MainClient.UtilityStatus.get("xray.legit").toString().equals("true")) {
                         if (isVisible(world, offsetX, y, offsetZ)) { i = 1;; }
                     }

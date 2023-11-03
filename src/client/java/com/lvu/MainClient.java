@@ -2,6 +2,7 @@ package com.lvu;
 
 import com.lvu.xray.Xray;
 import com.lvu.xray.chunk.OnChunkLoad;
+import com.lvu.xray.chunk.XrayChunkManager;
 import com.lvu.xray.render.Render;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -79,6 +80,7 @@ public class MainClient implements ClientModInitializer {
 			LoadUtilityProperties();
 			// Currently only the main settings require this.
 			LoadDefaults("/DefaultUtilities.properties", UtilityStatus);
+			//XrayChunkManager.LoadChunksFromFile();
 			return true;
 		} catch(Exception e) {
 			return false;
