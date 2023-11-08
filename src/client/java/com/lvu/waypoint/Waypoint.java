@@ -42,9 +42,9 @@ public class Waypoint implements Serializable {
     }
 
     public Waypoint(ClientPlayerEntity player, String name) {
-        this.x = (int) player.getX();
-        this.y = (int) player.getY();
-        this.z = (int) player.getZ();
+        this.x = player.getBlockX();
+        this.y = player.getBlockY();
+        this.z = player.getBlockZ();
         this.name = name;
         this.red = (int) Math.floor(Math.random() * 255);
         this.green = (int) Math.floor(Math.random() * 255);
@@ -52,13 +52,13 @@ public class Waypoint implements Serializable {
     }
 
     public Waypoint(ClientPlayerEntity player, String name, int red, int green, int blue) {
-        this.x = (int) player.getPos().x;
-        this.y = (int) player.getY();
-        this.z = (int) player.getPos().z;
+        this.x = player.getBlockX();
+        this.y = player.getBlockY();
+        this.z = player.getBlockZ();
         this.name = name;
-        this.red = (int) Math.floor(Math.random() * 255);
-        this.green = (int) Math.floor(Math.random() * 255);
-        this.blue = (int) Math.floor(Math.random() * 255);
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
     }
 
     // getter

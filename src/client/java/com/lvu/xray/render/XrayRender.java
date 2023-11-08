@@ -6,7 +6,6 @@ import com.lvu.xray.Xray;
 import com.lvu.xray.chunk.XrayChunkManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
@@ -21,17 +20,16 @@ import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class Render implements WorldRenderEvents.End {
+public class XrayRender {
     public static ChunkPos lastChunk;
 
     Direction[] Directions = new Direction[]{Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.WEST,Direction.EAST};
     public static int range = 2;
-    ArrayList<int[]> BlockCoord = null;
+    static ArrayList<int[]> BlockCoord = null;
     //Pattern pattern = Pattern.compile("(?<=block.minecraft.)(.*)(?=_ore|_debris|_block)");
 
 
-    @Override
-    public void onEnd(WorldRenderContext context) {
+    public static void Render(WorldRenderContext context) {
         if(MainClient.UtilityStatus.get("xray").equals("false")) { return; }
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (PlayerMoved() && MainClient.UtilityStatus.get("xray.pause").equals("false")) {
@@ -134,8 +132,8 @@ public class Render implements WorldRenderEvents.End {
                     }
 
                     tessellator.draw();
-                    tessellator.getBuffer().clear();
-                    bufferBuilder.clear();
+                    //tessellator.getBuffer().clear();
+                    //bufferBuilder.clear();
                     context.matrixStack().pop();
                     RenderSystem.enableDepthTest();
                 }

@@ -3,6 +3,7 @@
 	"package": "com.lvu.mixin.client",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
+		"OnDeathMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

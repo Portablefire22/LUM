@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.lvu.xray.render.Render.range;
+import static com.lvu.xray.render.XrayRender.range;
 
 public class XrayChunkManager {
     public static HashMap<ChunkPos, HashMap<String, ArrayList<int[]>>> ChunkMap = new HashMap<>();

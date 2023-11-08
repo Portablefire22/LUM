@@ -1,11 +1,8 @@
 package com.lvu;
 
-import com.lvu.waypoint.Waypoint;
 import com.lvu.waypoint.WaypointManager;
 import com.lvu.xray.Xray;
 import com.lvu.xray.chunk.OnChunkLoad;
-import com.lvu.xray.chunk.XrayChunkManager;
-import com.lvu.xray.render.Render;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -43,7 +40,7 @@ public class MainClient implements ClientModInitializer {
 		new File("config/lvu").mkdirs();
 		LoadProperties();
 		RegisterCommands();
-		WorldRenderEvents.END.register(new Render());
+		WorldRenderEvents.END.register(new RenderManager());
 		ClientChunkEvents.CHUNK_LOAD.register(new OnChunkLoad());
 		ClientLifecycleEvents.CLIENT_STOPPING.register(new OnClientStop());
 	}
@@ -174,13 +171,25 @@ public class MainClient implements ClientModInitializer {
 											.then(argument("Waypoint Name", StringArgumentType.string())
 													.executes(WaypointManager::CreateWaypoint))));
 
-			final LiteralCommandNode<FabricClientCommandSource> changeSetting =
+			final LiteralCommandNode<FabricClientCommandSource> addPoint =
 					dispatcher.register(
 							literal("waypoint")
 									.then(literal("add")
-											.then(argument("Waypoint Name", StringArgumentType.string())).redirect(NoPlayerOrPos))
+											.then(argument("Waypoint Name", StringArgumentType.string()).redirect(NoPlayerOrPos))
+									)
 				);
-
+			final LiteralCommandNode<FabricClientCommandSource> removePoint =
+					dispatcher.register(
+							literal("waypoint")
+								.then(literal("remove")
+										.then(argument("Waypoint Name", StringArgumentType.string()).suggests(CustomSuggestionProviders.WAYPOINTS).executes(WaypointManager::RemoveWaypoint))
+								));
+			final LiteralCommandNode<FabricClientCommandSource> clearPoint =
+					dispatcher.register(
+							literal("waypoint")
+									.then(literal("clear")
+											.executes(WaypointManager::ClearWaypoints))
+									);
 		});
 	}
 
@@ -190,10 +199,10 @@ public class MainClient implements ClientModInitializer {
 		String Utility = getString(context, "Utility Name");
 		boolean Decision = getString(context, "Decision").equals("enable");
 		switch (Utility) {
-			case "xray":
-					UtilityStatus.setProperty(Utility, String.valueOf(Decision));
+			case "xray", "waypoint":
+				UtilityStatus.setProperty(Utility, String.valueOf(Decision));
 				break;
-			default:
+            default:
 				throw new SimpleCommandExceptionType(Text.translatable("utility.missing")).create();
 		}
 		SaveProperties(UtilityStatus, "config/lvu/Utilities.properties");
