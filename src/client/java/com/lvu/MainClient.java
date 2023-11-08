@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 import static com.lvu.Main.LOGGER;
@@ -23,6 +24,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.arg
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 import com.mojang.brigadier.*;
+import net.minecraft.util.WorldSavePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,11 +74,20 @@ public class MainClient implements ClientModInitializer {
 		} catch (IOException ignored) { return false;}
 	}
 
+	public static String GetPlayerWorld() {
+		String worldIdentifier;
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (!client.isIntegratedServerRunning()) worldIdentifier = client.getCurrentServerEntry().address;
+		else worldIdentifier = client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString();
+		return worldIdentifier;
+	}
+
 	// Load all property files when client is initialised
 	public static boolean LoadProperties() {
 		try{
 			Xray.LoadProperties();
 			LoadUtilityProperties();
+			WaypointManager.LoadWaypoints();
 			// Currently only the main settings require this.
 			LoadDefaults("/DefaultUtilities.properties", UtilityStatus);
 			return true;

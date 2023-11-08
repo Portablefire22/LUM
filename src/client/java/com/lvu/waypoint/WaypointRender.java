@@ -1,6 +1,7 @@
 package com.lvu.waypoint;
 
 import com.lvu.Main;
+import com.lvu.MainClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
@@ -15,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
+import java.util.Objects;
 
 public class WaypointRender {
 
@@ -26,6 +28,7 @@ public class WaypointRender {
 
     public static void Render(WorldRenderContext context) {
         if (WaypointManager.Waypoints == null) {return;}
+
         MatrixStack matrixStack = context.matrixStack();
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -63,6 +66,7 @@ public class WaypointRender {
 
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         for (Waypoint waypoint: WaypointManager.Waypoints.values()) {
+            if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld())) continue;
 
             double centreX = waypoint.getX() + 0.5;
             double centreZ = waypoint.getZ() + 0.5;
@@ -109,6 +113,7 @@ public class WaypointRender {
         tessellator.getBuffer().clear();
         VertexConsumerProvider.Immediate vertProv = VertexConsumerProvider.immediate(tessellator.getBuffer());
         for (Waypoint waypoint : WaypointManager.Waypoints.values()) {
+            if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld())) continue;
             RenderWaypointName(context, vertProv, waypoint);
         }
         vertProv.draw();

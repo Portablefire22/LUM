@@ -1,7 +1,9 @@
 package com.lvu.waypoint;
 
+import com.lvu.MainClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.WorldSavePath;
 
 
 import java.io.Serializable;
@@ -14,6 +16,7 @@ public class Waypoint implements Serializable {
     private int z;
 
     private String dimension;
+    private String world;
     private boolean render;
 
     private String name;
@@ -30,7 +33,8 @@ public class Waypoint implements Serializable {
         this.z = z;
         this.render = true;
         assert MinecraftClient.getInstance().player != null;
-        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld());
+        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld().getRegistryKey().getValue().toString());
+        this.world = MainClient.GetPlayerWorld();
 
         this.red = (int) Math.floor(Math.random() * 255);
         this.green = (int) Math.floor(Math.random() * 255);
@@ -47,7 +51,8 @@ public class Waypoint implements Serializable {
         this.blue = blue;
         this.render = true;
         assert MinecraftClient.getInstance().player != null;
-        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld());
+        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld().getRegistryKey().getValue().toString());
+        this.world = MainClient.GetPlayerWorld();
     }
 
     public Waypoint(ClientPlayerEntity player, String name) {
@@ -60,7 +65,8 @@ public class Waypoint implements Serializable {
         this.blue = (int) Math.floor(Math.random() * 255);
         this.render = true;
         assert MinecraftClient.getInstance().player != null;
-        this.dimension = String.valueOf(player.getEntityWorld());
+        this.dimension = String.valueOf(player.getEntityWorld().getRegistryKey().getValue().toString().toString());
+        this.world = MainClient.GetPlayerWorld();
     }
 
     public Waypoint(ClientPlayerEntity player, String name, int red, int green, int blue) {
@@ -73,7 +79,8 @@ public class Waypoint implements Serializable {
         this.blue = blue;
         this.render = true;
         assert MinecraftClient.getInstance().player != null;
-        this.dimension = String.valueOf(player.getEntityWorld());
+        this.dimension = String.valueOf(player.getEntityWorld().getRegistryKey().getValue().toString());
+        this.world = MainClient.GetPlayerWorld();
     }
 
     // getter
@@ -103,6 +110,9 @@ public class Waypoint implements Serializable {
     public int getBlue() {
         return this.blue;
     }
+    public String getDimension() { return this.dimension; }
+    public String getWorld() { return this.world; }
+    public boolean isRender() { return this.render; }
     // setter
     public void setName(String name) { this.name = name; }
     public void setX(int x) { this.x = x; }
@@ -112,6 +122,7 @@ public class Waypoint implements Serializable {
     public void setGreen(int green) { this.green = green; }
     public void setBlue(int blue) { this.blue = blue; }
     public void setDimension(String dimension) { this.dimension = dimension; }
+    public void setWorld(String world) { this.world = world; }
     public void setRender(boolean render) { this.render = render; }
 }
 
