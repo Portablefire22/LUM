@@ -24,6 +24,8 @@ public class WaypointManager {
 
     }
 
+    // TODO Save waypoints to a file and load them on world load.
+
     public static int CreateWaypoint(CommandContext<FabricClientCommandSource> context) {
         String WayPointName = StringArgumentType.getString(context, "Waypoint Name");
         Waypoint waypoint = new Waypoint(context.getSource().getPlayer(), WayPointName);

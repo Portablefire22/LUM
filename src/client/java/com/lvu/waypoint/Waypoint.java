@@ -1,5 +1,6 @@
 package com.lvu.waypoint;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 
 
@@ -12,6 +13,8 @@ public class Waypoint implements Serializable {
     private int y;
     private int z;
 
+    private String dimension;
+    private boolean render;
 
     private String name;
 
@@ -25,6 +28,9 @@ public class Waypoint implements Serializable {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.render = true;
+        assert MinecraftClient.getInstance().player != null;
+        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld());
 
         this.red = (int) Math.floor(Math.random() * 255);
         this.green = (int) Math.floor(Math.random() * 255);
@@ -39,6 +45,9 @@ public class Waypoint implements Serializable {
         this.red = red;
         this.green = green;
         this.blue = blue;
+        this.render = true;
+        assert MinecraftClient.getInstance().player != null;
+        this.dimension = String.valueOf(MinecraftClient.getInstance().player.getEntityWorld());
     }
 
     public Waypoint(ClientPlayerEntity player, String name) {
@@ -49,6 +58,9 @@ public class Waypoint implements Serializable {
         this.red = (int) Math.floor(Math.random() * 255);
         this.green = (int) Math.floor(Math.random() * 255);
         this.blue = (int) Math.floor(Math.random() * 255);
+        this.render = true;
+        assert MinecraftClient.getInstance().player != null;
+        this.dimension = String.valueOf(player.getEntityWorld());
     }
 
     public Waypoint(ClientPlayerEntity player, String name, int red, int green, int blue) {
@@ -59,6 +71,9 @@ public class Waypoint implements Serializable {
         this.red = red;
         this.green = green;
         this.blue = blue;
+        this.render = true;
+        assert MinecraftClient.getInstance().player != null;
+        this.dimension = String.valueOf(player.getEntityWorld());
     }
 
     // getter
@@ -96,5 +111,7 @@ public class Waypoint implements Serializable {
     public void setRed(int red) { this.red = red; }
     public void setGreen(int green) { this.green = green; }
     public void setBlue(int blue) { this.blue = blue; }
+    public void setDimension(String dimension) { this.dimension = dimension; }
+    public void setRender(boolean render) { this.render = render; }
 }
 
