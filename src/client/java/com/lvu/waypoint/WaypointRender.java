@@ -20,7 +20,6 @@ public class WaypointRender {
 
     public static void Render(WorldRenderContext context) {
         if (WaypointManager.Waypoints == null) {return;}
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
         MatrixStack matrixStack = context.matrixStack();
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -88,7 +87,7 @@ public class WaypointRender {
             buffer.vertex(matrix, maxX, minY, minZ).color(red, green, blue, opacity).next();
             buffer.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, opacity).next();
             buffer.vertex(matrix, maxX , maxY, maxZ).color(red, green, blue, opacity).next();
-            //buffer.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, opacity).next();
+
         }
 
         tessellator.draw();
