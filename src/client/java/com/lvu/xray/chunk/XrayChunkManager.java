@@ -71,8 +71,9 @@ public class XrayChunkManager {
     Cons:
         - Storage space could get fucked if not done correctly
 
-
-    Currently the initial range does not ever get loaded. fix this.
+    Using portals kinda fucks with this if the chunk was not previously loaded.
+    Also think there may be a problem with overlapping chunks with differing dimensions.
+        - Has not occurred during my server playthrough
      */
 
     public static void ChunkToHash(World world, WorldChunk chunk) {

@@ -14,6 +14,10 @@ public class WaypointRender {
 
     private static final BufferBuilder Buffer1 = new BufferBuilder(2000000);
 
+    /* TODO
+    Add a system to show waypoint name and distance when the waypoint is hovered.
+     */
+
     public static void Render(WorldRenderContext context) {
         if (WaypointManager.Waypoints == null) {return;}
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
