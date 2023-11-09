@@ -13,8 +13,11 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
@@ -25,6 +28,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 import com.mojang.brigadier.*;
 import net.minecraft.util.WorldSavePath;
+import net.minecraft.world.WorldEvents;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +49,11 @@ public class MainClient implements ClientModInitializer {
 		WorldRenderEvents.END.register(new RenderManager());
 		ClientChunkEvents.CHUNK_LOAD.register(new OnChunkLoad());
 		ClientLifecycleEvents.CLIENT_STOPPING.register(new OnClientStop());
+
+		ClientPlayConnectionEvents.JOIN.register(new WorldJoin());
+		ClientPlayConnectionEvents.DISCONNECT.register(new WorldDisconnect());
+
+
 	}
 	public static boolean LoadUtilityProperties() {
 		if (!(new File("config/lvu/Utilities.properties").exists())) {
@@ -87,11 +96,11 @@ public class MainClient implements ClientModInitializer {
 		try{
 			Xray.LoadProperties();
 			LoadUtilityProperties();
-			WaypointManager.LoadWaypoints();
 			// Currently only the main settings require this.
 			LoadDefaults("/DefaultUtilities.properties", UtilityStatus);
 			return true;
 		} catch(Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

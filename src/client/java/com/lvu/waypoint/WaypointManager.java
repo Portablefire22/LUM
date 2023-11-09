@@ -1,5 +1,6 @@
 package com.lvu.waypoint;
 
+import com.lvu.MainClient;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,6 +16,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static com.lvu.Main.LOGGER;
@@ -25,24 +28,34 @@ public class WaypointManager {
 
     }
 
-    // TODO Save waypoints to a file and load them on world load.
+    // TODO Command to display waypoint information in chat.
 
     public static boolean SaveWaypoints() throws IOException {
         if (Waypoints == null) return false;
         if (Waypoints.isEmpty()) return true;
-        FileOutputStream fileOut = new FileOutputStream("config/lvu/Waypoints.dat");
+
+        String FilePath = String.format("config/lvu/Worlds/%s/", MainClient.GetPlayerWorld());
+        Files.createDirectories(Paths.get(FilePath));
+        FilePath = FilePath + "Waypoints.dat";
+        FileOutputStream fileOut = new FileOutputStream(FilePath);
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
         out.writeObject(Waypoints);
+        LOGGER.info("Saved Waypoints!");
         out.reset();
         out.close();
         fileOut.close();
         LOGGER.info("Saved waypoints to file");
-
+        Waypoints.clear();
         return true;
     }
     public static boolean LoadWaypoints() throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream("config/lvu/Waypoints.dat");
+        String FilePath = String.format("config/lvu/Worlds/%s/", MainClient.GetPlayerWorld());
+        Files.createDirectories(Paths.get(FilePath));
+        FilePath = FilePath + "Waypoints.dat";
+        FileInputStream fileIn = new FileInputStream(FilePath);
         ObjectInputStream in = new ObjectInputStream(fileIn);
+        if (Waypoints != null) { Waypoints.clear(); }
+        LOGGER.info("Loaded Waypoints!");
         Waypoints = (HashMap<String, Waypoint>) in.readObject();
         in.reset();
         in.close();
