@@ -107,22 +107,17 @@ public class WaypointRender {
                 if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld()))
                     continue;
                 RenderWaypointName(context, vertProv, waypoint);
-
             }
             vertProv.draw();
             matrixStack.pop();
             tessellator.getBuffer().clear();
+            RenderSystem.polygonOffset(0f, 0f);
+            RenderSystem.disablePolygonOffset();
+            RenderSystem.enableCull();
+            RenderSystem.disableBlend();
+            RenderSystem.disableBlend();
+            RenderSystem.disableDepthTest();
         }
-
-
-
-
-        RenderSystem.polygonOffset(0f, 0f);
-        RenderSystem.disablePolygonOffset();
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
     }
 
     private  static  void RenderWaypointName(WorldRenderContext context, VertexConsumerProvider vertProv, Waypoint waypoint) {
