@@ -8,6 +8,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,8 +21,30 @@ import java.util.Set;
 import static com.lvu.xray.render.XrayRender.range;
 
 public class XrayChunkManager {
+
+    /* TODO
+    Going to base future chunk work on the method that baritone uses since it is quite fast.
+
+    Chunk positions are fast to calculate so that can be done on the main thread.
+    Searching chunks is added to a thread pool through a parallel stream.
+
+    Chunk position is then bit shifted left by 4 to convert the chunk position into a
+    block position
+    1 << 4  = 16
+
+    Chunks are then iterated through by iterating through the sections of each chunk.
+     (each section being 16x16x16)
+    Discards chunk if it only contains air, this seems to be a function provided by chunk section
+    Use a filter to determine if it contains at least one block of use
+    Iterate through all blocks in the section and add the blocks to an ArrayList
+
+     */
+    ChunkSection t = MinecraftClient.getInstance().world.getChunkManager().getWorldChunk(1 ,1 , false).getSection(2);
+
+
     public static HashMap<ChunkPos, HashMap<String, ArrayList<int[]>>> ChunkMap = new HashMap<>();
     public static Set<ChunkPos> getchunks() {
+
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
         //System.out.println(player);
