@@ -28,45 +28,36 @@ public class WaypointRender {
 
     public static void Render(WorldRenderContext context) {
         if (WaypointManager.Waypoints == null) {return;}
-
+        if (WaypointManager.Waypoints.isEmpty()) { return; }
+        boolean HasRendered = false;
+        float size = 0.25f;
+        float opacity = 0.2f;
+        float maxY = 500;
+        float minY = -63;
         MatrixStack matrixStack = context.matrixStack();
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        /*GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_FOG);
-        GL11.glDepthMask(false); // if true, can't see entities and water behind the beam
-        GL11.glEnable(GL11.GL_BLEND); // if not enabled, beam is basically black
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);*/
-
-        double cameraX = context.camera().getPos().x;
-        double cameraY = context.camera().getPos().y;
-        double cameraZ = context.camera().getPos().z;
-
-
-        float size = 0.25f;
-        RenderSystem.disableCull();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.polygonOffset(-3f, -3f);
-        RenderSystem.enablePolygonOffset();
-        RenderSystem.enableBlend();
-        float opacity = 0.2f;
-
-
-        float maxY = 500;
-        float minY = -63;
-        /*VertexConsumerProvider vertexConsumerProvider = VertexConsumerProvider.immediate(buffer);*/
-        matrixStack.push();
-        matrixStack.translate(-cameraX, -cameraY, -cameraZ);
-
-
-
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         for (Waypoint waypoint: WaypointManager.Waypoints.values()) {
             if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld())) continue;
+            if (!HasRendered) {
+                double cameraX = context.camera().getPos().x;
+                double cameraY = context.camera().getPos().y;
+                double cameraZ = context.camera().getPos().z;
+                RenderSystem.disableCull();
+                RenderSystem.enableDepthTest();
+                RenderSystem.depthMask(false);
+                RenderSystem.polygonOffset(-3f, -3f);
+                RenderSystem.enablePolygonOffset();
+                RenderSystem.enableBlend();
+
+                /*VertexConsumerProvider vertexConsumerProvider = VertexConsumerProvider.immediate(buffer);*/
+                matrixStack.push();
+                matrixStack.translate(-cameraX, -cameraY, -cameraZ);
+                RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+                buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+                HasRendered = true;
+            }
 
             double centreX = waypoint.getX() + 0.5;
             double centreZ = waypoint.getZ() + 0.5;
@@ -108,16 +99,20 @@ public class WaypointRender {
             buffer.vertex(matrix, maxX , maxY, maxZ).color(red, green, blue, opacity).next();
 
         }
+        if (HasRendered) {
+            tessellator.draw();
+            tessellator.getBuffer().clear();
+            VertexConsumerProvider.Immediate vertProv = VertexConsumerProvider.immediate(tessellator.getBuffer());
+            for (Waypoint waypoint : WaypointManager.Waypoints.values()) {
+                if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld()))
+                    continue;
+                RenderWaypointName(context, vertProv, waypoint);
 
-        tessellator.draw();
-        tessellator.getBuffer().clear();
-        VertexConsumerProvider.Immediate vertProv = VertexConsumerProvider.immediate(tessellator.getBuffer());
-        for (Waypoint waypoint : WaypointManager.Waypoints.values()) {
-            if (!Objects.equals(waypoint.getDimension(), context.world().getRegistryKey().getValue().toString()) || !Objects.equals(waypoint.getWorld(), MainClient.GetPlayerWorld())) continue;
-            RenderWaypointName(context, vertProv, waypoint);
+            }
+            vertProv.draw();
+            matrixStack.pop();
+            tessellator.getBuffer().clear();
         }
-        vertProv.draw();
-        matrixStack.pop();
 
 
 
