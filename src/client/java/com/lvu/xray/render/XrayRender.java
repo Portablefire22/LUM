@@ -32,15 +32,13 @@ public class XrayRender {
     public static void Render(WorldRenderContext context) {
         if(MainClient.UtilityStatus.get("xray").equals("false")) { return; }
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        // Avoid rendering when it is not needed
         if (PlayerMoved() && MainClient.UtilityStatus.get("xray.pause").equals("false")) {
             Set<ChunkPos> chunks = XrayChunkManager.getchunks();
-            if (MainClient.UtilityStatus.get("xray.experimentalsearch").equals("false")){
-                BlockCoord = BlockManager.GetBlocks(context, chunks);
-            } else {
-                BlockCoord = BlockManager.GetBlocksHashSearch(context, chunks);
-            }
+            BlockCoord = BlockManager.GetBlocksHashSearch(context, chunks);
         }
         renderBox(BlockCoord, context);
+        assert player != null;
         lastChunk = new ChunkPos(player.getChunkPos().x, player.getChunkPos().z);
     }
 
@@ -49,7 +47,7 @@ public class XrayRender {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         final Vec3d cameraPos = context.camera().getPos();
         if (BlockCoord != null) {
-            VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+            //VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
             if(!BlockCoord.isEmpty()) {
                 for (int[] pos : BlockCoord) {
                     context.matrixStack().push();
@@ -143,6 +141,7 @@ public class XrayRender {
 
     private static boolean PlayerMoved() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        // Don't render if the player doesnt exist
         if (player == null) {
             return false;
         }

@@ -43,15 +43,23 @@ public class XrayChunkManager {
 
 
     public static HashMap<ChunkPos, HashMap<String, ArrayList<int[]>>> ChunkMap = new HashMap<>();
-    public static Set<ChunkPos> getchunks() {
 
+    public static void ConvertChunks() {
+        Set<ChunkPos> ChunkPositions = getchunks();
+        ChunkPositions.stream().parallel().forEach(XrayChunkManager::SearchChunk);
+    }
+
+    public static void SearchChunk(ChunkPos chunkPos) {
+
+    }
+
+    public static Set<ChunkPos> getchunks() {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
         //System.out.println(player);
         if (player != null) {
             range = Integer.parseInt(MainClient.UtilityStatus.get("xray.range").toString());
-            Set<ChunkPos> chunks = getChunkPosSet(player);
-            return chunks;
+            return getChunkPosSet(player);
         }
         return new HashSet<>();
     }
@@ -93,6 +101,8 @@ public class XrayChunkManager {
         - No lag spikes from moving around if you are in a chunk you have already visited
     Cons:
         - Storage space could get fucked if not done correctly
+
+    How the fuck does one check if a chunk has been modified?
 
     Using portals kinda fucks with this if the chunk was not previously loaded.
     Also think there may be a problem with overlapping chunks with differing dimensions.

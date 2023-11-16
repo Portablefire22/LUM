@@ -140,7 +140,6 @@ public class MainClient implements ClientModInitializer {
 
 	public void RegisterCommands() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> dispatcher.register(literal("refresh").executes(MainClient::RefreshProperties)));
-		long i = 2048532523523523L;
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, environment) -> {
 			final LiteralCommandNode<FabricClientCommandSource> removeNode =
 					dispatcher.register(
@@ -272,10 +271,10 @@ public class MainClient implements ClientModInitializer {
 	}
 
 	private boolean SimpleEnableCheck(String Utility, String Setting, String Value) {
-		if (Value.equals("enable") || Value.equals("true")) {
+		if (Value.equals("enable") || Value.equals("true") || Value.equals("on")){
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(true));
 			return true;
-		} else if (Value.equals("disable") || Value.equals("false")){
+		} else if (Value.equals("disable") || Value.equals("false") || Value.equals("off")){
 			UtilityStatus.setProperty(Utility+"."+Setting, String.valueOf(false));
 		}
 		return false;
